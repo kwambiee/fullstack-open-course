@@ -1,1 +1,3 @@
-## Attempting Part 0 of the exercise
+## Part 0: Sequence diagrams
+
+In Part 0 of the exercise, I have created sequence diagrams using Mermaid syntax to illustrate the request and response process of a single-page application (SPA). The diagrams detail the interactions between the browser and the server, including HTTP requests for HTML, CSS, and JavaScript files, as well as the creation of new notes without reloading the entire page. These visual representations help in understanding the flow of data and the efficiency of SPAs.
