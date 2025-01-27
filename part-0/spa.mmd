@@ -1,0 +1,31 @@
+%% This is a sequence diagram for the SPA request process
+sequenceDiagram
+    participant browser
+    participant server
+
+    %% The browser sends an HTTP GET request to the server to load the SPA
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa
+    activate server
+    %% The server responds with the HTML document
+    server-->>browser: HTTP 200 OK, HTML document
+    deactivate server
+
+    %% The browser sends an HTTP GET request to fetch the CSS file
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
+    activate server
+    %% The server responds with a 304 status code indicating the CSS file is not modified
+    server-->>browser: HTTP 304 Not Modified, CSS file
+    deactivate server
+
+    %% The browser sends an HTTP GET request to fetch the JavaScript file
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/spa.js
+    activate server
+    %% The server responds with a 304 status code indicating the JavaScript file is not modified
+    server-->>browser: HTTP 304 Not Modified, JavaScript file
+    deactivate server
+
+   %% The browser starts executing the JavaScript code that fetches the JSON data from the server
+    browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
+    activate server
+    server-->>browser: HTTP 200 OK, JSON data
+    deactivate server
