@@ -1,0 +1,14 @@
+
+sequenceDiagram
+    participant browser
+    participant server 
+
+    %% The browser sends an HTTP POST request to the server to create a new note
+    Note right of browser: POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+    
+    browser->>server: HTTP POST request, {"content":"a new note","date":"2021-08-31T10:00:00.000Z"}
+    activate server
+
+    Note right of browser: The server responds with an HTTP status code 201 (Created)
+    server-->>browser: HTTP 201 Created, [{"message":"note created"}]
+    deactivate server
