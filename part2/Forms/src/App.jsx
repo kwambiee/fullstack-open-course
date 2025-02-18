@@ -1,23 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "./Components/Header";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
+import { createPerson, getAll, deletePerson } from "./fetch";
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    {
-      name: "Arto Hellas",
-      number: "040-123456",
-    }
-  ]);
-
-  const [newUser, setNewUser] = useState({
-    name: "",
-    number: "",
-  });
-
+  const [persons, setPersons] = useState([]);
+  const [newUser, setNewUser] = useState({ name: "", number: "" });
   const [filter, setFilter] = useState("");
+
+  useEffect(() => {
+    getAllPersons();
+  }, []);
 
   const filterByName = (name) => {
     setFilter(name);
@@ -32,18 +27,42 @@ const App = () => {
     setNewUser({ ...newUser, [name]: value });
   };
 
-  const addPerson = (e) => { 
+  const getAllPersons = () => {
+   getAll().then((response) => setPersons(response));
+  };
+
+  const addPerson = (e) => {
     e.preventDefault();
     const personObject = {
       name: newUser.name,
       number: newUser.number,
+      // unique number for each person
+      id: Math.floor(Math.random() * 1000),
     };
-    setPersons(persons.concat(personObject));
+
+    // if user exists in the phonebook issue an alert
+    if (persons.some((person) => person.name === newUser.name)) {
+      alert(`${newUser.name} is already added to the phonebook`);
+      return;
+    }
+    createPerson(personObject).then((response) => { 
+      setPersons(persons.concat(response));
+    });
+    
     setNewUser({
       name: "",
       number: "",
     });
-  }
+  };
+
+  const handleDeletePerson = (id) => {
+    deletePerson(4).then((response) => {
+      setPersons(persons.filter((person) => person.id !== id));
+    });
+    // window.confirm
+    window.confirm("Delete this person?");
+
+  };
 
   return (
     <div>
@@ -54,7 +73,10 @@ const App = () => {
         handleUserDetails={handleUserDetails}
         user={newUser}
       />
-      <Persons persons={filter ? filteredPersons : persons} />
+      <Persons
+        persons={filteredPersons}
+        handleDeletePerson={handleDeletePerson}
+      />
     </div>
   );
 };
