@@ -3,7 +3,7 @@ import Header from "./Components/Header";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
-import { createPerson, getAll, deletePerson } from "./fetch";
+import { createPerson, getAll, deletePerson, updatePerson } from "./fetch";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -28,7 +28,7 @@ const App = () => {
   };
 
   const getAllPersons = () => {
-   getAll().then((response) => setPersons(response));
+    getAll().then((response) => setPersons(response));
   };
 
   const addPerson = (e) => {
@@ -37,32 +37,63 @@ const App = () => {
       name: newUser.name,
       number: newUser.number,
       // unique number for each person
-      id: Math.floor(Math.random() * 1000),
+      id: String(Math.floor(Math.random() * 1000)),
     };
 
     // if user exists in the phonebook issue an alert
     if (persons.some((person) => person.name === newUser.name)) {
-      alert(`${newUser.name} is already added to the phonebook`);
+      // ask whether they would like to update the number
+      if (
+        window.confirm(
+          `${newUser.name} is already added to the phonebook, replace the old number with a new one?`
+        )
+      ) {
+        // update the person number
+        const person = persons.find((person) => person.name === newUser.name);
+        const updatedPerson = { ...person, number: newUser.number };
+        updatePerson(person.id, updatedPerson)
+          .then((response) => {
+            setPersons(
+              persons.map((person) =>
+                person.id !== updatedPerson.id ? person : response
+              )
+            );
+            setNewUser({ name: "", number: "" });
+          })
+          .catch((error) => {
+            console.error("Error updating person:", error);
+          });
+
+      }
       return;
-    }
-    createPerson(personObject).then((response) => { 
+    } 
+    createPerson(personObject).then((response) => {
       setPersons(persons.concat(response));
     });
+    // notification
     
     setNewUser({
       name: "",
       number: "",
+    }).catch((error) => {
+      console.error("Error creating person:", error);
     });
   };
 
   const handleDeletePerson = (id) => {
-    deletePerson(4).then((response) => {
-      setPersons(persons.filter((person) => person.id !== id));
-    });
-    // window.confirm
-    window.confirm("Delete this person?");
-
+    if (window.confirm("Do you want to delete this person?")) {
+      // if ok is clicked, delete the person
+      deletePerson(id)
+        .then((response) => {
+          setPersons(persons.filter((person) => person.id !== id));
+        })
+        .catch((error) => {
+          console.error("Error deleting person:", error);
+        });
+    }
   };
+
+
 
   return (
     <div>
