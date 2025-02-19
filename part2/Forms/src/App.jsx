@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import Header from "./Components/Header";
-import Filter from "./components/Filter";
-import PersonForm from "./components/PersonForm";
-import Persons from "./components/Persons";
+import Filter from "./Components/Filter";
+import PersonForm from "./Components/PersonForm";
+import Persons from "./Components/Persons";
+import Notification from "./Components/Notification";
 import { createPerson, getAll, deletePerson, updatePerson } from "./fetch";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newUser, setNewUser] = useState({ name: "", number: "" });
   const [filter, setFilter] = useState("");
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     getAllPersons();
@@ -36,19 +38,15 @@ const App = () => {
     const personObject = {
       name: newUser.name,
       number: newUser.number,
-      // unique number for each person
       id: String(Math.floor(Math.random() * 1000)),
     };
 
-    // if user exists in the phonebook issue an alert
     if (persons.some((person) => person.name === newUser.name)) {
-      // ask whether they would like to update the number
       if (
         window.confirm(
           `${newUser.name} is already added to the phonebook, replace the old number with a new one?`
         )
       ) {
-        // update the person number
         const person = persons.find((person) => person.name === newUser.name);
         const updatedPerson = { ...person, number: newUser.number };
         updatePerson(person.id, updatedPerson)
@@ -59,25 +57,42 @@ const App = () => {
               )
             );
             setNewUser({ name: "", number: "" });
+            setNotification(
+              `${newUser.name}'s number was updated successfully`
+            );
+            setTimeout(() => {
+              setNotification(null);
+            }, 3000);
           })
           .catch((error) => {
-            console.error("Error updating person:", error);
+            if (error.response && error.response.status === 404) {
+              setNotification(
+                `Error: ${newUser.name} has already been deleted from the server`
+              );
+              setPersons(persons.filter((p) => p.id !== person.id));
+            } else {
+              console.error("Error updating person:", error);
+            }
+            setTimeout(() => {
+              setNotification(null);
+            }, 3000);
           });
-
       }
       return;
-    } 
-    createPerson(personObject).then((response) => {
-      setPersons(persons.concat(response));
-    });
-    // notification
-    
-    setNewUser({
-      name: "",
-      number: "",
-    }).catch((error) => {
-      console.error("Error creating person:", error);
-    });
+    }
+
+    createPerson(personObject)
+      .then((response) => {
+        setPersons(persons.concat(response));
+        setNotification(`${newUser.name} was added successfully`);
+        setTimeout(() => {
+          setNotification(null);
+        }, 3000);
+        setNewUser({ name: "", number: "" });
+      })
+      .catch((error) => {
+        console.error("Error creating person:", error);
+      });
   };
 
   const handleDeletePerson = (id) => {
@@ -86,6 +101,12 @@ const App = () => {
       deletePerson(id)
         .then((response) => {
           setPersons(persons.filter((person) => person.id !== id));
+          // notification this user.name was deleted
+          const person = persons.find((person) => person.id === id);
+          setNotification(`${person.name} was deleted successfully`);
+          setTimeout(() => {
+            setNotification(null);
+          }, 3000);
         })
         .catch((error) => {
           console.error("Error deleting person:", error);
@@ -93,10 +114,9 @@ const App = () => {
     }
   };
 
-
-
   return (
     <div>
+      <Notification message={notification} />
       <Header />
       <Filter handleFilter={filterByName} />
       <PersonForm
