@@ -5,6 +5,7 @@ import PersonForm from "./Components/PersonForm";
 import Persons from "./Components/Persons";
 import Notification from "./Components/Notification";
 import { createPerson, getAll, deletePerson, updatePerson } from "./fetch";
+import "./App.css";
 
 const App = () => {
   const [persons, setPersons] = useState([]);

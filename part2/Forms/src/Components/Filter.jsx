@@ -1,8 +1,10 @@
 const Filter = ({ handleFilter }) => {
   return (
     <div>
-        <div>
-            filter shown with: <input onChange={(e) => handleFilter(e.target.value)} />
+        <div className="text-center mt-4">
+        filter shown with: <input onChange={(e) => handleFilter(e.target.value)}
+          className="border rounded p-2"
+        />
         </div>
     </div>
   );

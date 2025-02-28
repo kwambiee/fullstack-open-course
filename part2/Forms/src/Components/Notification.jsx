@@ -4,7 +4,7 @@ const Notification = ({ message }) => {
     }
     
     return (
-        <div className="notification">
+        <div className="border w-1/2 mx-auto mt-4 p-4 bg-green-200 text-green-800 font-bold">
         {message}
         </div>
     );
